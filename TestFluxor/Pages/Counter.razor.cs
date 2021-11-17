@@ -1,49 +1,52 @@
 ﻿using Fluxor;
 using Fluxor.Blazor.Web.Components;
+using Fluxor.Blazor.Web.Middlewares.Routing;
 using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using TestFluxor.Actions;
-using TestFluxor.States;
 
 namespace TestFluxor.Pages
 {
 	public partial class Counter : FluxorComponent
 	{
 		[Inject]
-		private IState<CounterState> CounterState { get; set; }
+		private IState<RoutingState> RoutingState { get; set; }
 
-		[Inject]
-		private IDispatcher Dispatcher { get; set; }
+        [Inject]
+        private NavigationManager NavigationManager { get; set; }
 
-		private int _internalCounterValue;
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
 
-		private async Task InvokeCallbackAsync()
-		{
-			Console.WriteLine("DISPATCH_START_QUERY");
-			Dispatcher.Dispatch(new StartQueryCounterAction());
-			Console.WriteLine("DISPATCHED_START_QUERY");
+            Console.WriteLine("PARAM STATE: {0}", RoutingState.Value.Uri);
+            Console.WriteLine("PARAM MANAGER: {0}", NavigationManager.Uri);
+        }
 
-			var value = await CounterState.Value.CounterTask;
-			_internalCounterValue = value;
-			Console.WriteLine("DISPATCH_START_QUERY_RESULT: {0}", _internalCounterValue);
+        protected override async Task OnParametersSetAsync()
+        {
+            await base.OnParametersSetAsync();
 
-			Console.WriteLine("DISPATCH_FINISH_QUERY");
-			Dispatcher.Dispatch(new FinishQueryCounterAction());
-			Console.WriteLine("DISPATCHED_FINISH_QUERY");
-		}
+            Console.WriteLine("ASYNC PARAM STATE: {0}", RoutingState.Value.Uri);
+            Console.WriteLine("ASYNC PARAM MANAGER: {0}", NavigationManager.Uri);
+        }
 
-		protected override async Task OnAfterRenderAsync(bool firstRender)
-		{
-			if (firstRender)
-			{
-				await InvokeCallbackAsync();
-				StateHasChanged();
-			}
+        protected override void OnInitialized()
+        {
+            base.OnInitialized();
 
-			await base.OnAfterRenderAsync(firstRender);
-		}
-	}
+            Console.WriteLine("STATE: {0}", RoutingState.Value.Uri);
+            Console.WriteLine("MANAGER: {0}", NavigationManager.Uri);
+        }
+
+        protected override async Task OnInitializedAsync()
+        {
+            await base.OnInitializedAsync();
+
+            Console.WriteLine("ASYNC STATE: {0}", RoutingState.Value.Uri);
+            Console.WriteLine("ASYNC MANAGER: {0}", NavigationManager.Uri);
+        }
+    }
 }
