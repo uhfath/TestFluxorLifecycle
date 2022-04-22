@@ -23,7 +23,7 @@ namespace TestFluxor
 			builder.Services.AddFluxor(opts =>
 			{
 				opts.ScanAssemblies(typeof(Program).Assembly);
-				opts.UseReduxDevTools();
+				//opts.UseReduxDevTools();
 				opts.UseRouting();
 			});
 			builder.Services.AddScoped<CounterService>();
