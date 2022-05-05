@@ -1,7 +1,5 @@
 ﻿@inherits FluxorComponent
 @page "/counter"
 
-<h1>@CounterState.Value.Value</h1>
-
-<button @onclick="OnIncrement">TEST</button>
-<span>Auto cancel&nbsp;<input type="checkbox" checked="@isAutoCancel" @onclick="() => isAutoCancel = !isAutoCancel" /></span>
+<PageTitle>TestFluxor - @CounterValue</PageTitle>
+<input value="@CounterValue" @onchange="OnCounterChanged" />

@@ -2,6 +2,8 @@
 using Fluxor.Blazor.Web.Components;
 using Fluxor.Blazor.Web.Middlewares.Routing;
 using Microsoft.AspNetCore.Components;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,26 +15,64 @@ namespace TestFluxor.Pages
 {
 	public partial class Counter : FluxorComponent
 	{
-		[Inject]
-		private IState<CounterState> CounterState { get; set; }
+		//[Inject]
+		//private IState<CounterState> CounterState { get; set; }
+
+		//[Inject]
+		//private IDispatcher Dispatcher { get; set; }
 
 		[Inject]
-		private IDispatcher Dispatcher { get; set; }
+		private NavigationManager NavigationManager { get; set; }
 
-		private bool isAutoCancel = true;
-		private CancellationTokenSource cancellationTokenSource;
+		[Inject]
+		private ILogger<Counter> Logger { get; set; }
 
-		private void OnIncrement()
+		[Parameter]
+		[SupplyParameterFromQuery]
+		public string CounterValue { get; set; }
+
+		private void SaveState()
 		{
-			cancellationTokenSource = new();
-			Dispatcher.Dispatch(new CounterAction(1, cancellationTokenSource.Token));
-
-			if (isAutoCancel)
+			var uri = NavigationManager.GetUriWithQueryParameters(new Dictionary<string, object>
 			{
-				cancellationTokenSource.Cancel();
-			}
+				{ nameof(CounterValue), CounterValue },
+			});
 
-			cancellationTokenSource.Dispose();
+			Logger.LogInformation("SAVE: {counter}", CounterValue);
+			NavigationManager.NavigateTo(uri);
+		}
+
+		private void OnCounterChanged(ChangeEventArgs args)
+		{
+			CounterValue = args.Value?.ToString();
+			SaveState();
+		}
+
+		private void NavigationManager_LocationChanged(object sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+		{
+			Logger.LogInformation("LOCATION: {counter}", CounterValue);
+		}
+
+		protected override void OnParametersSet()
+		{
+			base.OnParametersSet();
+
+			Logger.LogInformation("PARAMS: {counter}", CounterValue);
+		}
+
+		protected override void OnInitialized()
+		{
+			base.OnInitialized();
+			Logger.LogInformation("INIT: {counter}", CounterValue);
+
+			NavigationManager.LocationChanged += NavigationManager_LocationChanged;
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			base.Dispose(disposing);
+
+			NavigationManager.LocationChanged -= NavigationManager_LocationChanged;
 		}
 	}
 }

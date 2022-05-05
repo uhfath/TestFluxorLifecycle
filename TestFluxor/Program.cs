@@ -1,5 +1,6 @@
 using Blazored.SessionStorage;
 using Fluxor;
+using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,12 +19,17 @@ namespace TestFluxor
 		{
 			var builder = WebAssemblyHostBuilder.CreateDefault(args);
 			builder.RootComponents.Add<App>("#app");
+			builder.RootComponents.Add<HeadOutlet>("head::after");
 
 			builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 			builder.Services.AddFluxor(opts =>
 			{
 				opts.ScanAssemblies(typeof(Program).Assembly);
-				//opts.UseReduxDevTools();
+				opts.UseReduxDevTools(cfg =>
+				{
+					cfg.EnableStackTrace();
+					cfg.UseNewtonsoftJson();
+				});
 				opts.UseRouting();
 			});
 			builder.Services.AddScoped<CounterService>();

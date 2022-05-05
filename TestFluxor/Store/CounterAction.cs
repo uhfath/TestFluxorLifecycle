@@ -7,13 +7,11 @@ namespace TestFluxor.Store
 {
 	public class CounterAction
 	{
-		public int Step { get; }
-		public CancellationToken CancellationToken { get; }
+		public int Value { get; }
 
-		public CounterAction(int step, CancellationToken cancellationToken)
+		public CounterAction(int value)
 		{
-			Step = step;
-			CancellationToken = cancellationToken;
+			Value = value;
 		}
 
 		private static class Reducers
@@ -22,17 +20,8 @@ namespace TestFluxor.Store
 			public static CounterState Reduce(CounterState counterState, CounterAction counterAction) =>
 				counterState with
 				{
-					Value = counterState.Value + counterAction.Step,
+					Value = counterAction.Value,
 				};
-		}
-
-		private class Effect : Effect<CounterAction>
-		{
-			public override async Task HandleAsync(CounterAction action, IDispatcher dispatcher)
-			{
-				await Task.Delay(1000, action.CancellationToken);
-				throw new NotImplementedException();
-			}
 		}
 	}
 }
